@@ -188,3 +188,26 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+.blue-scrollbar::-webkit-scrollbar {
+  height: 12px !important;
+}
+
+.blue-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9 !important;
+  border-radius: 10px !important;
+}
+
+.blue-scrollbar::-webkit-scrollbar-thumb {
+  background: #2563eb !important;
+  border-radius: 10px !important;
+}
+
+.blue-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #1d4ed8 !important;
+}
+
+.blue-scrollbar {
+  scrollbar-color: #2563eb #f1f5f9 !important;
+  scrollbar-width: thin !important;
+}
