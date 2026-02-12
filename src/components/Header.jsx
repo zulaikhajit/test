@@ -7,7 +7,7 @@ export default function Header() {
           alt="Logo" 
           className="h-10 w-10 object-contain"
         />
-        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">
+        <h2 className="text-xl font-semibold text-blue-600 dark:text-blue-500">
           Lead Management
         </h2>
       </div>
