@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import { submitQuery } from "../api/api";
 
 export default function Form() {
@@ -73,15 +74,20 @@ export default function Form() {
 
       if (result.ok && result.data.success) {
         console.log("Success:", result.data);
-        setSuccess(true);
-        setResponseData(result.data.data || []);
-        setFormData({ Email: "", LeadID: "", Phone: "" });
+        const data = result.data.data || [];
+        setResponseData(data);
+        
+        if (data.length > 0) {
+          setSuccess(true);
+        } else {
+          setError("No records found");
+        }
       } else if (result.status === 422) {
         console.log("Validation Error:", result.data.message || result.data);
         setError(result.data.detail || result.data.message || "Validation error occurred");
       } else {
         console.log("Error:", result.data);
-        setError(result.data.detail || result.data.message || "An error occurred");
+        setError("No records found");
       }
     } catch (error) {
       console.error("Request failed:", error);
@@ -164,7 +170,7 @@ export default function Form() {
         
         {success && (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg text-sm mt-4">
-            Query submitted successfully!
+            Lead record has been found
           </div>
         )}
       </form>
@@ -173,25 +179,37 @@ export default function Form() {
         <div className="mt-6">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-              Query Results
+              Leads Results ({responseData.length})
             </h3>
-            <Button 
-              type="button"
-              onClick={downloadCSV}
-              className="!bg-blue-600 hover:!bg-blue-700 !text-white"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    type="button"
+                    onClick={downloadCSV}
+                    className="!bg-blue-600 hover:!bg-blue-700 !text-white !px-3 !py-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                      <polyline points="7 10 12 15 17 10"></polyline>
+                      <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Download CSV</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
           <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
             <div className="overflow-x-auto blue-scrollbar">
               <Table>
                 <TableHeader className="bg-slate-50 dark:bg-slate-900">
                   <TableRow>
+                    <TableHead className="font-semibold whitespace-nowrap">
+                      S.No
+                    </TableHead>
                     {Object.keys(responseData[0]).map((key) => (
                       <TableHead key={key} className="font-semibold whitespace-nowrap">
                         {key}
@@ -202,6 +220,9 @@ export default function Form() {
                 <TableBody>
                   {responseData.map((row, index) => (
                     <TableRow key={index}>
+                      <TableCell className="text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                        {index + 1}
+                      </TableCell>
                       {Object.values(row).map((value, idx) => (
                         <TableCell key={idx} className="text-slate-600 dark:text-slate-400 whitespace-nowrap">
                           {String(value)}
