@@ -12,7 +12,7 @@ function App() {
         <div className="w-full max-w-7xl mx-auto">
           <div className="text-center mb-6">
             <h3 className="text-4xl font-bold text-blue-600 dark:text-blue-500 mb-2">
-             casagrand Leads View Interface
+             Casagrand Leads View Interface
             </h3>
           </div>
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl p-6 border border-slate-200 dark:border-slate-700">
