@@ -4,10 +4,7 @@ interface FormData {
 }
 
 export interface TableRow {
-  Name: string;
-  Email: string;
-  Phone: string;
-  Id: string;
+  [key: string]: any; // Allow all fields from API
 }
 
 interface RawApiResponse {
@@ -35,6 +32,7 @@ export const submitQuery = async (formData: FormData): Promise<{
   ok: boolean;
   status: number;
   tableData?: TableRow[];
+  rawData?: any[];
 }> => {
   try {
     // Transform the request body to match API expectations
@@ -66,22 +64,19 @@ export const submitQuery = async (formData: FormData): Promise<{
       return {
         ok: true,
         status: response.status,
-        tableData: []
+        tableData: [],
+        rawData: []
       };
     }
 
-    // Transform raw data to table format with only required columns
-    const tableData: TableRow[] = rawData.data.map(record => ({
-      Name: record.Name || '',
-      Email: record.Email || '',
-      Phone: record.Phone || '',
-      Id: record.Id || ''
-    }));
+    // Pass through all fields from the API response
+    const tableData: TableRow[] = rawData.data;
     
     return {
       ok: true,
       status: response.status,
-      tableData
+      tableData,
+      rawData: rawData.data
     };
   } catch (error) {
     console.error("API request failed:", error);
