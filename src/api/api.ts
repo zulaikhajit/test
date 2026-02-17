@@ -4,10 +4,8 @@ interface FormData {
 }
 
 interface ApiResponse {
-  phone?: string;
-  phoneDuplicates?: string[];
-  email?: string;
-  emailDuplicates?: string[];
+  phones?: Array<{ phone: string; ids: string[] }>;
+  emails?: Array<{ email: string; ids: string[] }>;
 }
 
 interface RawApiResponse {
@@ -30,25 +28,39 @@ const api = {
 };
 
 // Parse row_duplicate_id_remark: "+919422581444 (in Id(s): 00Qfu00000NVL2yEAH, 00Q2w00000dgMu8EAE)"
-const parsePhoneData = (remark: string): { phone: string; ids: string[] } | null => {
-  const match = remark.match(/^(.+?)\s*\(in Id\(s\):\s*(.+?)\)$/);
-  if (!match) return null;
+// Handles multiple entries separated by |: "+919789255705 (in Id(s): 00Qfu00000MxasPEAR, 00Qfu00000MxapBEAR) | +919080324653 (in Id(s): 00Qfu00000MxasPEAR, 00Qfu00000MxapBEAR)"
+const parsePhoneData = (remark: string): Array<{ phone: string; ids: string[] }> => {
+  const entries = remark.split('|').map(entry => entry.trim()).filter(entry => entry);
+  const results: Array<{ phone: string; ids: string[] }> = [];
   
-  const phone = match[1].trim();
-  const ids = match[2].split(',').map(id => id.trim()).filter(id => id);
+  for (const entry of entries) {
+    const match = entry.match(/^(.+?)\s*\(in Id\(s\):\s*(.+?)\)$/);
+    if (match) {
+      const phone = match[1].trim();
+      const ids = match[2].split(',').map(id => id.trim()).filter(id => id);
+      results.push({ phone, ids });
+    }
+  }
   
-  return { phone, ids };
+  return results;
 };
 
 // Parse row_duplicate_position: "es_pramod@yahoo.com [00Q2w00000dgMu8EAE, 00Qfu00000NVL2yEAH]"
-const parseEmailData = (position: string): { email: string; ids: string[] } | null => {
-  const match = position.match(/^(.+?)\s*\[(.+?)\]$/);
-  if (!match) return null;
+// Handles multiple entries separated by |: "sriram20199@gmail.com [00Qfu00000MxapBEAR, 00Qfu00000MxasPEAR] | sriram677@gmail.com [00Qfu00000MxapBEAR, 00Qfu00000MxasPEAR]"
+const parseEmailData = (position: string): Array<{ email: string; ids: string[] }> => {
+  const entries = position.split('|').map(entry => entry.trim()).filter(entry => entry);
+  const results: Array<{ email: string; ids: string[] }> = [];
   
-  const email = match[1].trim();
-  const ids = match[2].split(',').map(id => id.trim()).filter(id => id);
+  for (const entry of entries) {
+    const match = entry.match(/^(.+?)\s*\[(.+?)\]$/);
+    if (match) {
+      const email = match[1].trim();
+      const ids = match[2].split(',').map(id => id.trim()).filter(id => id);
+      results.push({ email, ids });
+    }
+  }
   
-  return { email, ids };
+  return results;
 };
 
 export const submitQuery = async (formData: FormData): Promise<{
@@ -100,18 +112,16 @@ export const submitQuery = async (formData: FormData): Promise<{
     // Parse phone data from row_duplicate_id_remark
     if (firstRecord.row_duplicate_id_remark) {
       const phoneData = parsePhoneData(firstRecord.row_duplicate_id_remark);
-      if (phoneData) {
-        parsedData.phone = phoneData.phone;
-        parsedData.phoneDuplicates = phoneData.ids;
+      if (phoneData.length > 0) {
+        parsedData.phones = phoneData;
       }
     }
     
     // Parse email data from row_duplicate_position
     if (firstRecord.row_duplicate_position) {
       const emailData = parseEmailData(firstRecord.row_duplicate_position);
-      if (emailData) {
-        parsedData.email = emailData.email;
-        parsedData.emailDuplicates = emailData.ids;
+      if (emailData.length > 0) {
+        parsedData.emails = emailData;
       }
     }
     
