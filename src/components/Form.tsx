@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { submitQuery } from "../api/api";
+import { Search, Download, Loader2 } from "lucide-react";
 
 interface ApiResponse {
   phone?: string;
@@ -16,6 +17,44 @@ export default function Form() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [responseData, setResponseData] = useState<ApiResponse | null>(null);
+  const [rawData, setRawData] = useState<any[]>([]);
+
+  const downloadCSV = () => {
+    if (!rawData || rawData.length === 0) return;
+
+    // Get all unique keys from all records
+    const allKeys = new Set<string>();
+    rawData.forEach(record => {
+      Object.keys(record).forEach(key => allKeys.add(key));
+    });
+    const headers = Array.from(allKeys);
+
+    // Create CSV content
+    const csvRows = [];
+    csvRows.push(headers.join(','));
+
+    rawData.forEach(record => {
+      const values = headers.map(header => {
+        const value = record[header];
+        if (value === null || value === undefined) return '';
+        const stringValue = String(value).replace(/"/g, '""');
+        return `"${stringValue}"`;
+      });
+      csvRows.push(values.join(','));
+    });
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `leads_${searchBy}_${searchValue}_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -37,6 +76,7 @@ export default function Form() {
 
       if (result.ok) {
         setResponseData(result.data);
+        setRawData(result.rawData || []);
         
         const hasPhoneDuplicates = result.data.phoneDuplicates && result.data.phoneDuplicates.length > 0;
         const hasEmailDuplicates = result.data.emailDuplicates && result.data.emailDuplicates.length > 0;
@@ -98,22 +138,27 @@ export default function Form() {
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <Loader2 className="h-4 w-4 animate-spin" />
                 Searching...
               </span>
             ) : (
               <>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.35-4.35"></path>
-                </svg>
+                <Search className="mr-2 h-4 w-4" />
                 Search
               </>
             )}
           </Button>
+
+          {rawData.length > 0 && (
+            <Button 
+              type="button"
+              onClick={downloadCSV}
+              className="px-8"
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download CSV
+            </Button>
+          )}
         </div>
 
         {error && (
