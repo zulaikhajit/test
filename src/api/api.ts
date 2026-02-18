@@ -22,11 +22,12 @@ interface RawApiResponse {
 }
 
 const api = {
-  baseUrl: "https://casagrand.jitglobalinfosystems.com/api",
+  baseUrl: "https://df5pfcljwg.execute-api.ap-south-1.amazonaws.com",
   endpoints: {
     posts: "/query",
   },
 };
+
 
 export const submitQuery = async (formData: FormData): Promise<{
   ok: boolean;
