@@ -22,7 +22,7 @@ interface RawApiResponse {
 }
 
 const api = {
-  baseUrl: "http://65.2.187.159:8000",
+  baseUrl: "https://casagrand.jitglobalinfosystems.com/api",
   endpoints: {
     posts: "/query",
   },
@@ -52,10 +52,19 @@ export const submitQuery = async (formData: FormData): Promise<{
     });
 
     if (!response.ok) {
+      console.error(`HTTP Error: ${response.status} ${response.statusText}`);
       return {
         ok: false,
         status: response.status
       };
+    }
+
+    // Check if response is actually JSON
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+      const textResponse = await response.text();
+      console.error("Expected JSON but received:", textResponse.substring(0, 200));
+      throw new Error("Server returned non-JSON response");
     }
 
     const rawData: RawApiResponse = await response.json();
