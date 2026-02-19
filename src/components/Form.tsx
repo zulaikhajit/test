@@ -18,10 +18,29 @@ export default function Form() {
   const downloadCSV = () => {
     if (!tableData.length) return;
 
-    // 1️⃣ collect all unique headers from all rows
-    const headers = Array.from(
+    // Fields to exclude from CSV export
+    const excludedFields = [
+      'Phone_cleansed', 'MobilePhone_cleansed', 'WA_Formatted_Phone__c_cleansed',
+      'Encrypted_SMobile__c_cleansed', 'Mobile_Phone__c_cleansed', 'Phone__c_cleansed',
+      'Mobile3__c_cleansed', 'Mobile4__c_cleansed', 'Mobile5__c_cleansed',
+      'Mobile6__c_cleansed', 'Mobile7__c_cleansed', 'Mobile8__c_cleansed',
+      'Mobile9__c_cleansed', 'Mobile10__c_cleansed', 'invalid_numbers',
+      'invalid_number_count', 'Invalid_mobile', 'doubtful_numbers',
+      'doubtful_number_count', 'doubtful_mobile', 'Email_cleansed',
+      'Secondary_Email__c_cleansed', 'primary_valid_email_format',
+      'primary_invalid_email_format_comments', 'secondary_valid_email_format',
+      'secondary_invalid_email_format_comments', 'row_duplicate_phone',
+      'row_duplication', 'row_duplicate_position', 'row_duplicate_count',
+      'column_duplication', 'column_duplicate_flag', 'column_duplicate_count',
+      'column_duplicate_numbers', 'column_duplicate_remark', 'row_duplicate_flag'
+    ];
+
+    // 1️⃣ collect all unique headers from all rows, excluding unwanted fields
+    const allHeaders = Array.from(
       new Set(tableData.flatMap((row) => Object.keys(row)))
     );
+    
+    const headers = allHeaders.filter(header => !excludedFields.includes(header));
 
     const csvRows: string[] = [];
 
