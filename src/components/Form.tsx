@@ -20,13 +20,16 @@ export default function Form() {
 
     // Only include these columns in CSV export
     const selectedColumns = [
-      'Id',
-      'Name',
-      'MobilePhone',
-      'Owner',
-      'Owner.Name',
-      'Master_Lead__r',
-      'Master_Lead__r.Name'
+      'Company',
+      'LastName',
+      'Mobilephone',
+      'Country_Code__c',
+      'Email',
+      'LeadSource',
+      'Secondary_Source__c',
+      'Tertiary_Source__c',
+      'Createddate',
+      'Project_Interested__c'
     ];
 
     const csvRows: string[] = [];
