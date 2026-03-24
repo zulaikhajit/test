@@ -204,10 +204,10 @@ export default function Form() {
                     {String(row.Id ?? "-")}
                   </td>
                   <td className="px-6 py-4">
-                    {String(row.Name ?? "-")}
+                    {String(row.LastName ?? "-")}
                   </td>
                   <td className="px-6 py-4">
-                    {String(row.Phone ?? "-")}
+                    {String(row.MobilePhone ?? "-")}
                   </td>
                   <td className="px-6 py-4">
                     {String(row.Email ?? "-")}

@@ -4,30 +4,22 @@ interface FormData {
 }
 
 export interface TableRow {
-  [key: string]: any; // Allow all fields from API
+  [key: string]: any;
 }
 
 interface RawApiResponse {
   success: boolean;
-  count: number;
   data: Array<{
-    Name?: string;
-    Email?: string;
-    Phone?: string;
-    Id?: string;
     [key: string]: any;
   }>;
-  execution_time_ms?: number;
-  from_cache?: boolean;
 }
 
 const api = {
-  baseUrl: "https://df5pfcljwg.execute-api.ap-south-1.amazonaws.com",
+  baseUrl: "http://13.200.193.75:8000",
   endpoints: {
-    posts: "/query",
+    query: "/query",
   },
 };
-
 
 export const submitQuery = async (formData: FormData): Promise<{
   ok: boolean;
@@ -37,14 +29,16 @@ export const submitQuery = async (formData: FormData): Promise<{
 }> => {
   try {
     // Transform the request body to match API expectations
-    // API expects: {"Email": "string", "Id": "string", "Phone": "string"}
+    // API expects: {"Id": null, "Email": "string", "Phone": "string"}
     const requestBody = {
-      Email: formData.searchBy === "email" ? formData.searchValue : "",
-      Id: formData.searchBy === "id" ? formData.searchValue : "",
-      Phone: formData.searchBy === "phone" ? formData.searchValue : ""
+      Id: formData.searchBy === "id" ? formData.searchValue : null,
+      Email: formData.searchBy === "email" ? formData.searchValue : null,
+      Phone: formData.searchBy === "phone" ? formData.searchValue : null
     };
-    
-    const response = await fetch(`${api.baseUrl}${api.endpoints.posts}`, {
+
+    console.log("Sending request:", requestBody);
+
+    const response = await fetch(`${api.baseUrl}${api.endpoints.query}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -60,7 +54,6 @@ export const submitQuery = async (formData: FormData): Promise<{
       };
     }
 
-    // Check if response is actually JSON
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("application/json")) {
       const textResponse = await response.text();
@@ -69,7 +62,7 @@ export const submitQuery = async (formData: FormData): Promise<{
     }
 
     const rawData: RawApiResponse = await response.json();
-    
+
     if (!rawData.success || !rawData.data || rawData.data.length === 0) {
       return {
         ok: true,
@@ -79,9 +72,8 @@ export const submitQuery = async (formData: FormData): Promise<{
       };
     }
 
-    // Pass through all fields from the API response
     const tableData: TableRow[] = rawData.data;
-    
+
     return {
       ok: true,
       status: response.status,
