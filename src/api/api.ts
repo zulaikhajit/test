@@ -77,27 +77,26 @@ export const submitQuery = async (formData: FormData): Promise<{
     
     rawData.data.forEach((record) => {
       // Extract duplicate IDs from phone_row_duplicate_id_remark
+      // Format: "917603855102[00Qfu00000EBheIEAT, 00Qfu00000EBjBSEA1]"
       const phoneDuplicateMatch = record.phone_row_duplicate_id_remark?.match(/\[(.*?)\]/);
       const duplicateIds = phoneDuplicateMatch 
         ? phoneDuplicateMatch[1].split(', ').map((id: string) => id.trim())
         : [record.Id];
 
       // Extract duplicate emails from email_row_duplicate_position
-      const emailDuplicateMatch = record.email_row_duplicate_position?.match(/\[(.*?)\]/);
-      const duplicateEmails = emailDuplicateMatch 
-        ? emailDuplicateMatch[1].split(', ').map((email: string) => email.trim())
-        : [record.Email];
+      // Format: "priyadharshini30728@gmail.com [00Qfu00000EBheIEAT, 00Qfu00000EBjBSEA1]"
+      // We need to extract the email part before the bracket
+      const emailMatch = record.email_row_duplicate_position?.match(/^(.*?)\s*\[/);
+      const baseEmail = emailMatch ? emailMatch[1].trim() : record.Email;
 
-      // Create a row for each duplicate combination
-      const maxDuplicates = Math.max(duplicateIds.length, duplicateEmails.length);
-      
-      for (let i = 0; i < maxDuplicates; i++) {
+      // Create a row for each duplicate ID, using the same email if no duplicates
+      duplicateIds.forEach((id) => {
         tableData.push({
           ...record,
-          Id: duplicateIds[i] || record.Id,
-          Email: duplicateEmails[i] || record.Email
+          Id: id,
+          Email: baseEmail
         });
-      }
+      });
     });
 
     return {
