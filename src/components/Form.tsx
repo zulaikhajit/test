@@ -22,13 +22,13 @@ export default function Form() {
     const selectedColumns = [
       'Company',
       'LastName',
-      'Mobilephone',
       'Country_Code__c',
+      'MobilePhone',
       'Email',
       'LeadSource',
       'Secondary_Source__c',
       'Tertiary_Source__c',
-      'Createddate',
+      // 'Createddate',
       'Project_Interested__c'
     ];
 
