@@ -72,7 +72,33 @@ export const submitQuery = async (formData: FormData): Promise<{
       };
     }
 
-    const tableData: TableRow[] = rawData.data;
+    // Expand duplicate records into separate rows
+    const tableData: TableRow[] = [];
+    
+    rawData.data.forEach((record) => {
+      // Extract duplicate IDs from phone_row_duplicate_id_remark
+      const phoneDuplicateMatch = record.phone_row_duplicate_id_remark?.match(/\[(.*?)\]/);
+      const duplicateIds = phoneDuplicateMatch 
+        ? phoneDuplicateMatch[1].split(', ').map((id: string) => id.trim())
+        : [record.Id];
+
+      // Extract duplicate emails from email_row_duplicate_position
+      const emailDuplicateMatch = record.email_row_duplicate_position?.match(/\[(.*?)\]/);
+      const duplicateEmails = emailDuplicateMatch 
+        ? emailDuplicateMatch[1].split(', ').map((email: string) => email.trim())
+        : [record.Email];
+
+      // Create a row for each duplicate combination
+      const maxDuplicates = Math.max(duplicateIds.length, duplicateEmails.length);
+      
+      for (let i = 0; i < maxDuplicates; i++) {
+        tableData.push({
+          ...record,
+          Id: duplicateIds[i] || record.Id,
+          Email: duplicateEmails[i] || record.Email
+        });
+      }
+    });
 
     return {
       ok: true,
