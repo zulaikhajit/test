@@ -15,7 +15,8 @@ interface RawApiResponse {
 }
 
 const api = {
-  baseUrl: "http://13.200.193.75:8000",
+  // baseUrl: "http://13.200.193.75:8000",
+  baseUrl:"https://casagrand.jitglobalinfosystems.com",
   endpoints: {
     query: "/query",
   },
@@ -79,9 +80,10 @@ export const submitQuery = async (formData: FormData): Promise<{
       // Extract duplicate IDs from phone_row_duplicate_id_remark
       // Format: "917603855102[00Qfu00000EBheIEAT, 00Qfu00000EBjBSEA1]"
       const phoneDuplicateMatch = record.phone_row_duplicate_id_remark?.match(/\[(.*?)\]/);
-      const duplicateIds = phoneDuplicateMatch 
+      // Ensure we always work with string IDs (prevents `forEach((id) => ...)` from becoming `any`).
+      const duplicateIds: string[] = phoneDuplicateMatch
         ? phoneDuplicateMatch[1].split(', ').map((id: string) => id.trim())
-        : [record.Id];
+        : [String(record.Id)];
 
       // Extract duplicate emails from email_row_duplicate_position
       // Format: "priyadharshini30728@gmail.com [00Qfu00000EBheIEAT, 00Qfu00000EBjBSEA1]"

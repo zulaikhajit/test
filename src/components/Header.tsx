@@ -1,19 +1,19 @@
 export default function Header() {
   return (
     <header className="w-full bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700">
-      <div className="w-full px-6 py-10 flex items-center gap-3">
+      <div className="w-full px-3 py-5 flex items-center gap-3">
         <img 
           // src="https://tse1.mm.bing.net/th/id/OIP.3UvXxgvgwIjQvoTX5JGLAQAAAA?pid=Api&P=0&h=220" 
           src="https://tse1.mm.bing.net/th/id/OIP.3UvXxgvgwIjQvoTX5JGLAQAAAA?pid=Api&P=0&h=220"
           alt="Logo"
 
 
-    className="h-16 w-auto object-contain"
+    className="h-12 w-auto object-contain"
 
         />
-        <h2 className="text-4xl font-semibold text-blue-600 dark:text-blue-500">
+        <h5 className="text-2xl font-semibold text-blue-700 dark:text-blue-700" style={{display:"flex", justifyContent:"end"}}>
           Lead Management 
-        </h2>
+        </h5>
       </div>
     </header>
   );
