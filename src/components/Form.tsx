@@ -217,24 +217,32 @@ export default function Form() {
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Phone</th>
                 <th className="px-6 py-3">Email</th>
+                <th className="px-6 py-3">Master Lead</th>
+                <th className="px-6 py-3">Last Modified Date</th>
               </tr>
             </thead>
             <tbody>
               {tableData.map((row, index) => (
                 <tr key={index} className="border-b">
                   <td className="px-6 py-4 font-mono">
-                    {String(row.Id ?? "-")}
+                    {String(row.id ?? "-")}
                   </td>
                   <td className="px-6 py-4">
-                    {String(row.Company ?? "-")}
+                    {String(row.company ?? "-")}
                   </td>
                   <td className="px-6 py-4">
-                  {typeof row.MobilePhone === "string"
-                    ? row.MobilePhone.replace(/^\+/, "")
+                  {typeof row.phone === "string"
+                    ? row.phone.replace(/^\+/, "")
                     : "-"}
                   </td>
                   <td className="px-6 py-4">
-                    {String(row.Email ?? "-")}
+                    {String(row.email ?? "-")}
+                  </td>
+                  <td className="px-6 py-4">
+                    {String(row.master_lead__c ?? "-")}
+                  </td>
+                  <td className="px-6 py-4">
+                    {String(row.lastmodifieddate ?? "-")}
                   </td>
                 </tr>
               ))}
