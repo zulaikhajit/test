@@ -15,64 +15,64 @@ export default function Form() {
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
   // ✅ dynamic CSV export - only selected columns
-  const downloadCSV = () => {
-    if (!tableData.length) return;
+const downloadCSV = () => {
+  if (!tableData.length) return;
 
-    // Only include these columns in CSV export
-    const selectedColumns = [
-      'Company',
-      'LastName',
-      'Country_Code__c',
-      'MobilePhone',
-      'Email',
-      'LeadSource',
-      'Secondary_Source__c',
-      'Tertiary_Source__c',
-      // 'Createddate',
-      'Project_Interested__c'
-    ];
-
-    const csvRows: string[] = [];
-
-    // 1️⃣ header row
-    csvRows.push(selectedColumns.join(","));
-
-    // 2️⃣ data rows
-    tableData.forEach((row) => {
-      console.log('row :>> ', row);
-      const values = selectedColumns.map((column) => {
-        let value = row[column];
-
-        if (value === null || value === undefined) return "";
-
-        if (["MobilePhone", "Country_Code__c"].includes(column)) {
-          value = String(value).replace(/^\+/, ""); // removes only starting +
-        }
-
-        const stringValue = String(value).replace(/"/g, '""');
-        return `"${stringValue}"`;
-      });
-
-      csvRows.push(values.join(","));
-    });
-
-    // 3️⃣ download
-    const blob = new Blob([csvRows.join("\n")], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = `leads_${searchBy}_${searchValue}_${
-      new Date().toISOString().split("T")[0]
-    }.csv`;
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // map CSV column → API field
+  const columnMap: Record<string, string> = {
+    Company: "company",
+    LastName: "lastname",
+    Country_Code__c: "country_code__c",
+    MobilePhone: "phone",
+    Email: "email",
+    LeadSource: "leadsource",
+    Secondary_Source__c: "secondary_source__c",
+    Tertiary_Source__c: "tertiary_source__c",
+    Project_Interested__c: "project_interested__c"
   };
+
+  const csvRows: string[] = [];
+
+  // header row
+  csvRows.push(Object.keys(columnMap).join(","));
+
+  // data rows
+  tableData.forEach((row) => {
+    const values = Object.entries(columnMap).map(([csvColumn, apiField]) => {
+
+      let value = row[apiField];
+
+      if (value === null || value === undefined) return "";
+
+      // remove + from phone
+      if (apiField === "phone" || apiField === "country_code__c") {
+        value = String(value).replace(/^\+/, "");
+      }
+
+      const stringValue = String(value).replace(/"/g, '""');
+
+      return `"${stringValue}"`;
+    });
+
+    csvRows.push(values.join(","));
+  });
+
+  const blob = new Blob([csvRows.join("\n")], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `leads_${searchBy}_${searchValue}_${new Date()
+    .toISOString()
+    .split("T")[0]}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -254,165 +254,3 @@ export default function Form() {
   );
 }
 
-// import { useState } from "react";
-// import { Input } from "./ui/input";
-// import { Button } from "./ui/button";
-// import { submitQuery } from "../api/api";
-// import { Search, Download, Loader2 } from "lucide-react";
-// import { motion } from "framer-motion";
-
-// export default function Form() {
-//   const [searchBy, setSearchBy] = useState("phone");
-//   const [searchValue, setSearchValue] = useState("");
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-//   const [tableData, setTableData] = useState([]);
-
-//   const downloadCSV = () => {
-//     if (!tableData.length) return;
-
-//     const selectedColumns = [
-//       "Company",
-//       "LastName",
-//       "Country_Code__c",
-//       "MobilePhone",
-//       "Email",
-//       "LeadSource",
-//       "Secondary_Source__c",
-//       "Tertiary_Source__c",
-//       "Project_Interested__c",
-//     ];
-
-//     const csvRows = [];
-//     csvRows.push(selectedColumns.join(","));
-
-//     tableData.forEach((row) => {
-//       const values = selectedColumns.map((column) => {
-//         let value = row[column];
-//         if (!value) return "";
-
-//         if (["MobilePhone", "Country_Code__c"].includes(column)) {
-//           value = String(value).replace(/^\+/, "");
-//         }
-
-//         return `"${String(value).replace(/"/g, '""')}"`;
-//       });
-
-//       csvRows.push(values.join(","));
-//     });
-
-//     const blob = new Blob([csvRows.join("\n")], {
-//       type: "text/csv;charset=utf-8;",
-//     });
-
-//     const url = URL.createObjectURL(blob);
-//     const link = document.createElement("a");
-//     link.href = url;
-//     link.download = `leads.csv`;
-//     link.click();
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     if (!searchValue.trim()) return setError("Enter value");
-
-//     setLoading(true);
-//     setError("");
-//     setTableData([]);
-
-//     try {
-//       const result = await submitQuery({ searchBy, searchValue });
-//       if (result.ok && result.rawData?.length) {
-//         setTableData(result.rawData);
-//       } else setError("No records found");
-//     } catch {
-//       setError("Error fetching data");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   return (
-//     <div className="p-3 max-w-1xl mx-auto">
-//       <motion.div
-//         initial={{ opacity: 0, y: 30 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         className="bg-white shadow-xl rounded-2xl p-6 border border-yellow-200"
-//       >
-//         <form onSubmit={handleSubmit} className="flex flex-wrap gap-4">
-//           <select
-//             value={searchBy}
-//             onChange={(e) => setSearchBy(e.target.value)}
-//             className="h-11 px-4 rounded-xl border focus:ring-2 focus:ring-yellow-400"
-//           >
-//             <option value="phone">Phone</option>
-//             <option value="email">Email</option>
-//             <option value="id">Lead ID</option>
-//           </select>
-
-//           <Input
-//             className="flex-1 h-11 rounded-xl focus:ring-2 focus:ring-yellow-400"
-//             placeholder="Enter value..."
-//             value={searchValue}
-//             onChange={(e) => setSearchValue(e.target.value)}
-//           />
-
-//           <Button className="bg-yellow-400 hover:bg-yellow-500 rounded-xl px-6">
-//             {loading ? (
-//               <Loader2 className="animate-spin" />
-//             ) : (
-//               <Search />
-//             )}
-//           </Button>
-
-//           {tableData.length > 0 && (
-//             <Button
-//               type="button"
-//               onClick={downloadCSV}
-//               className="bg-black text-white rounded-xl px-6"
-//             >
-//               <Download />
-//             </Button>
-//           )}
-//         </form>
-
-//         {error && (
-//           <p className="text-red-500 mt-4 animate-pulse">{error}</p>
-//         )}
-//       </motion.div>
-
-//       {tableData.length > 0 && (
-//         <motion.div
-//           initial={{ opacity: 0 }}
-//           animate={{ opacity: 1 }}
-//           className="mt-6 overflow-hidden rounded-2xl shadow-lg"
-//         >
-//           <table className="w-full text-sm">
-//             <thead className="bg-yellow-400 text-black">
-//               <tr>
-//                 <th className="p-4">ID</th>
-//                 <th>Name</th>
-//                 <th>Phone</th>
-//                 <th>Email</th>
-//               </tr>
-//             </thead>
-//             <tbody>
-//               {tableData.map((row, i) => (
-//                 <motion.tr
-//                   key={i}
-//                   whileHover={{ scale: 1.01 }}
-//                   className="border-b hover:bg-yellow-50 transition"
-//                 >
-//                   <td className="p-4">{row.Id}</td>
-//                   <td>{row.LastName}</td>
-//                   <td>{row.MobilePhone?.slice(1)}</td>
-//                   <td>{row.Email}</td>
-//                 </motion.tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </motion.div>
-//       )}
-//     </div>
-//   );
-// }
