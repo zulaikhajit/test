@@ -20,12 +20,14 @@ const downloadCSV = () => {
 
   // map CSV column → API field
   const columnMap: Record<string, string> = {
+    ID:"id",
     Company: "company",
     LastName: "lastname",
     Country_Code__c: "country_code__c",
     MobilePhone: "phone",
     Email: "email",
     LeadSource: "leadsource",
+    master_lead__c:"master_lead__c",
     Secondary_Source__c: "secondary_source__c",
     Tertiary_Source__c: "tertiary_source__c",
     Project_Interested__c: "project_interested__c"
@@ -217,7 +219,7 @@ const downloadCSV = () => {
                 <th className="px-6 py-3">Name</th>
                 <th className="px-6 py-3">Phone</th>
                 <th className="px-6 py-3">Email</th>
-                <th className="px-6 py-3">Master Lead</th>
+                <th className="px-6 py-3">Master_Lead_c</th>
                 <th className="px-6 py-3">Last Modified Date</th>
               </tr>
             </thead>
