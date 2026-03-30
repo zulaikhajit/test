@@ -14,11 +14,70 @@ export default function Form() {
   const [error, setError] = useState("");
   const [tableData, setTableData] = useState<TableRow[]>([]);
 
-  // ✅ dynamic CSV export - only selected columns
+//   // ✅ dynamic CSV export - only selected columns
+// const downloadCSV = () => {
+//   if (!tableData.length) return;
+
+//   // map CSV column → API field
+//   const columnMap: Record<string, string> = {
+//     ID:"id",
+//     Company: "company",
+//     LastName: "lastname",
+//     Country_Code__c: "country_code__c",
+//     MobilePhone: "phone",
+//     Email: "email",
+//     LeadSource: "leadsource",
+//     master_lead__c:"master_lead__c",
+//     Secondary_Source__c: "secondary_source__c",
+//     Tertiary_Source__c: "tertiary_source__c",
+//     Project_Interested__c: "project_interested__c"
+//   };
+
+//   const csvRows: string[] = [];
+
+//   // header row
+//   csvRows.push(Object.keys(columnMap).join(","));
+
+//   // data rows
+//   tableData.forEach((row) => {
+//     const values = Object.entries(columnMap).map(([csvColumn, apiField]) => {
+
+//       let value = row[apiField];
+
+//       if (value === null || value === undefined) return "";
+
+//       // remove + from phone
+//       if (apiField === "phone" || apiField === "country_code__c") {
+//         value = String(value).replace(/^\+/, "");
+//       }
+
+//       const stringValue = String(value).replace(/"/g, '""');
+
+//       return `"${stringValue}"`;
+//     });
+
+//     csvRows.push(values.join(","));
+//   });
+
+//   const blob = new Blob([csvRows.join("\n")], {
+//     type: "text/csv;charset=utf-8;",
+//   });
+
+//   const url = URL.createObjectURL(blob);
+//   const link = document.createElement("a");
+
+//   link.href = url;
+//   link.download = `leads_${searchBy}_${searchValue}_${new Date()
+//     .toISOString()
+//     .split("T")[0]}.csv`;
+
+//   document.body.appendChild(link);
+//   link.click();
+//   document.body.removeChild(link);
+// };
 const downloadCSV = () => {
   if (!tableData.length) return;
 
-  // map CSV column → API field
   const columnMap: Record<string, string> = {
     ID:"id",
     Company: "company",
@@ -35,18 +94,18 @@ const downloadCSV = () => {
 
   const csvRows: string[] = [];
 
-  // header row
+  // header
   csvRows.push(Object.keys(columnMap).join(","));
 
-  // data rows
+  // rows
   tableData.forEach((row) => {
-    const values = Object.entries(columnMap).map(([csvColumn, apiField]) => {
+
+    const values = Object.values(columnMap).map((apiField) => {
 
       let value = row[apiField];
 
       if (value === null || value === undefined) return "";
 
-      // remove + from phone
       if (apiField === "phone" || apiField === "country_code__c") {
         value = String(value).replace(/^\+/, "");
       }
